@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from goodminton.courts import CourtAvailability
 
 
-class InvalidTimeRangeException(Exception):
+class InvalidTimeRangeError(Exception):
     """
     An exception to be raised when a time range is incorrectly formatted.
     """

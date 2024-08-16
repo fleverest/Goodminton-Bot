@@ -21,7 +21,7 @@ def duration_hours(dt1: datetime, dt2: datetime) -> float:
     return td.seconds / (60 * 60)
 
 
-class UnknownLocation(Exception):
+class UnknownLocationError(Exception):
     """
     An exception to be raised when location string does not match any known
     Monash sport location.
@@ -71,7 +71,7 @@ class CourtBooking:
         start_time = format_time(self.start)
         end_time = format_time(self.end)
         return (
-            f"{self.location} ({self.court_name}) on {date}"
+            f"{self.location} ({self.court_name}) on {date} "
             f"for {self.duration:.2f} hours ({start_time} to {end_time})."
         )
 
