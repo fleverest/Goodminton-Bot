@@ -139,4 +139,7 @@ class Summary:
     def __repr__(self):
         d = format_date(self.date)
         t = format_time(self.start)
-        return f"{self.location} on {d} from {t} " f"({self.num_courts} courts)"
+        return (
+            f"{self.location} on {d} from {t} "
+            f"({self.num_courts} courts, up to {self.max_duration} hours)"
+        )
