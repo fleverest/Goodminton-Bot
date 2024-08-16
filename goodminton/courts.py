@@ -6,8 +6,8 @@ from datetime import datetime, date, time
 
 
 def format_date(d: date) -> str:
-    "Format dates as 'dd Month'"
-    return d.strftime("%d %B")
+    "Format dates as 'day (dd Month)'"
+    return d.strftime("%A (%d %B)")
 
 
 def format_time(t: time) -> str:
