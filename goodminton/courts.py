@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-from datetime import datetime, date, time, timedelta
+from datetime import datetime, date, time
 
 
 def format_date(d: date) -> str:
@@ -15,11 +15,10 @@ def format_time(t: time) -> str:
     return t.strftime("%I:%M %P")
 
 
-def format_duration(dt1: datetime, dt2: datetime) -> str:
-    "Format timedelta in number of hours (2 dec. places)"
+def duration_hours(dt1: datetime, dt2: datetime) -> float:
+    "Calculate duration in number of hours"
     td = abs(dt1 - dt2)
-    hours = td.seconds / (60 * 60)
-    return f"{hours:.2f}"
+    return td.seconds / (60 * 60)
 
 
 class UnknownLocation(Exception):
@@ -27,6 +26,7 @@ class UnknownLocation(Exception):
     An exception to be raised when location string does not match any known
     Monash sport location.
     """
+
     pass
 
 
@@ -39,14 +39,13 @@ class Location(Enum):
 
     @classmethod
     def from_str(cls, s):
-        if s.lower() == cls.CLAYTON.lower():
+        if s.lower() == cls.CLAYTON.value.lower():
             return cls.CLAYTON
-        elif s.lower() == cls.CAULFIELD.lower():
+        elif s.lower() == cls.CAULFIELD.value.lower():
             return cls.CAULFIELD
         else:
             raise UnknownLocation(
-                "Location not recognised. Expected one of 'clayton' or "
-                "'caulfield'."
+                "Location not recognised. Expected one of 'clayton' or " "'caulfield'."
             )
 
     def __str__(self):
@@ -64,8 +63,8 @@ class CourtBooking:
     end: datetime
 
     @property
-    def duration(self) -> str:
-        return format_duration(self.start, self.end)
+    def duration(self) -> float:
+        return duration_hours(self.start, self.end)
 
     def __repr__(self):
         date = format_date(self.start.date())
@@ -73,7 +72,7 @@ class CourtBooking:
         end_time = format_time(self.end)
         return (
             f"{self.location} ({self.court_name}) on {date}"
-            f" from {start_time} to {end_time}"
+            f"for {self.duration:.2f} hours ({start_time} to {end_time})."
         )
 
 
@@ -88,8 +87,8 @@ class CourtAvailability:
     end: datetime
 
     @property
-    def duration(self) -> str:
-        return format_duration(self.start, self.end)
+    def duration(self) -> float:
+        return duration_hours(self.start, self.end)
 
     def __repr__(self):
         date = format_date(self.start.date())
@@ -97,5 +96,47 @@ class CourtAvailability:
         end_time = format_time(self.end)
         return (
             f"{self.location} ({self.court_name}) on {date}"
-            f" from {start_time} to {end_time}"
+            f"for {self.duration:.2f} hours ({start_time} to {end_time})."
         )
+
+
+@dataclass
+class Summary:
+
+    "A dataclass for storing summaries of availabilities."
+
+    location: Location
+    date: date
+    start: time
+    num_courts: int
+    max_duration: float
+    min_duration: float
+
+    @classmethod
+    def compute_list(cls, availabilities: list[CourtAvailability]):
+        summaries = []
+        locs = set([a.location for a in availabilities])
+        for loc in locs:
+            loc_availabilities = [a for a in availabilities if a.location == loc]
+            starts = set([a.start for a in loc_availabilities])
+            for s in starts:
+                s_loc_availabilities = [a for a in loc_availabilities if a.start == s]
+                num_courts = len(s_loc_availabilities)
+                max_duration = max([a.duration for a in s_loc_availabilities])
+                min_duration = min([a.duration for a in s_loc_availabilities])
+                summaries.append(
+                    cls(
+                        location=loc,
+                        date=s.date(),
+                        start=s.time(),
+                        num_courts=num_courts,
+                        max_duration=max_duration,
+                        min_duration=min_duration,
+                    )
+                )
+        return summaries
+
+    def __repr__(self):
+        d = format_date(self.date)
+        t = format_time(self.start)
+        return f"{self.location} on {d} from {t} " f"({self.num_courts} courts)"
