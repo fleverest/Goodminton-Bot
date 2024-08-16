@@ -1,7 +1,7 @@
 # Tools for scraping the public Monash sport website for bookings.
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
-from datetime import datetime, date, time, timedelta
+from datetime import datetime, date, time
 
 import tree_sitter_javascript as tsjs
 from tree_sitter import Language, Parser
