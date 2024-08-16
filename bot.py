@@ -2,7 +2,7 @@
 import os
 import telebot
 
-from datetime import date, timedelta
+from datetime import datetime, date, timedelta
 
 from goodminton.courts import UnknownLocationError, Summary, Location
 from goodminton.filters import TimeRangeFilter, DurationFilter
@@ -80,6 +80,7 @@ def create_poll(message):
 
     # Compute summaries
     summaries = Summary.compute_list(avails)
+    summaries.sort(key=lambda s: datetime.combine(s.date, s.start))
 
     # Send poll
     options = [telebot.types.PollOption(str(summary)) for summary in summaries]
