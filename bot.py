@@ -84,7 +84,12 @@ def create_poll(message):
 
     # Send poll
     options = [telebot.types.PollOption(str(summary)) for summary in summaries]
-    if len(options) > 1:
+    if len(options) > 10:
+        botminton.send_message(
+            message.chat.id,
+            f"Too many ({len(options)}) options to display in a single poll.",
+        )
+    elif len(options) > 1:
         botminton.send_poll(
             message.chat.id,
             "Which booking(s) are you available for?",
