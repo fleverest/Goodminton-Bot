@@ -44,7 +44,7 @@ class Location(Enum):
         elif s.lower() == cls.CAULFIELD.value.lower():
             return cls.CAULFIELD
         else:
-            raise UnknownLocation(
+            raise UnknownLocationError(
                 "Location not recognised. Expected one of 'clayton' or " "'caulfield'."
             )
 

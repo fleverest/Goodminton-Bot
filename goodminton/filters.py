@@ -43,11 +43,11 @@ class TimeRangeFilter:
             if start_str:
                 start = time.fromisoformat(start_str)
         except ValueError as e:
-            raise InvalidTimeRangeException(*e.args)
+            raise InvalidTimeRangeError(*e.args)
         if end or start:
             return cls(start=start, end=end)
         else:
-            raise InvalidTimeRangeException("Must specify either `start` or `end`.")
+            raise InvalidTimeRangeError("Must specify either `start` or `end`.")
 
     def filter(
         self, availabilities: list[CourtAvailability]
