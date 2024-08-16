@@ -6,7 +6,7 @@ from datetime import datetime, date, time
 import tree_sitter_javascript as tsjs
 from tree_sitter import Language, Parser
 
-from courts import CourtBooking, CourtAvailability, Location
+from goodminton.courts import CourtBooking, CourtAvailability, Location
 
 
 URL_CAULFIELD = "https://www.mymonashsport.com.au/public/facility/iframe/753/1030/"
@@ -14,7 +14,8 @@ URL_CLAYTON = "https://www.mymonashsport.com.au/public/facility/iframe/754/1018/
 
 JS_LANG = Language(tsjs.language())
 
-COURT_BOOKINGS_QUERY = JS_LANG.query("""
+COURT_BOOKINGS_QUERY = JS_LANG.query(
+    """
 (
     (pair
         key: (property_identifier) @key-name
@@ -22,9 +23,11 @@ COURT_BOOKINGS_QUERY = JS_LANG.query("""
     )
     (#eq? @key-name "events")
 )
-""")
+"""
+)
 
-DATES_QUERY = JS_LANG.query("""
+DATES_QUERY = JS_LANG.query(
+    """
 (
     (new_expression
         constructor: (identifier) @name
@@ -32,7 +35,8 @@ DATES_QUERY = JS_LANG.query("""
     )
     (#eq? @name "Date")
 )
-""")
+"""
+)
 
 
 def scrape_bookings(location: Location, date_iso: str):
@@ -49,10 +53,9 @@ def scrape_bookings(location: Location, date_iso: str):
     """
     # Construct URL to scrape
     if location == Location.CLAYTON:
-        url = URL_CLAYTON
+        url = URL_CLAYTON + date_iso
     elif location == Location.CAULFIELD:
-        url = URL_CAULFIELD
-    url += date_iso
+        url = URL_CAULFIELD + date_iso
 
     # Fetch the HTML
     out = urlopen(url).readlines()
@@ -79,8 +82,7 @@ def scrape_bookings(location: Location, date_iso: str):
     for court_id, bookings_data in enumerate(court_bookings_raw):
         # Extract the booking times
         booking_times_raw = [
-            booking[1]["args"]
-            for booking in DATES_QUERY.matches(bookings_data)
+            booking[1]["args"] for booking in DATES_QUERY.matches(bookings_data)
         ]
         # Convert list of integers to datetimes
         booking_times = [
@@ -92,19 +94,22 @@ def scrape_bookings(location: Location, date_iso: str):
                         for num in b.children
                         if num.type == "number"
                     ][3:]
-                )
-            ) for b in booking_times_raw
+                ),
+            )
+            for b in booking_times_raw
         ]
         # Construct CourtBooking objects
         while booking_times:
             end = booking_times.pop()
             start = booking_times.pop()
-            bookings.append(CourtBooking(
-                location=location,
-                court_name=court_id_to_names[court_id],
-                start=start,
-                end=end
-            ))
+            bookings.append(
+                CourtBooking(
+                    location=location,
+                    court_name=court_id_to_names[court_id],
+                    start=start,
+                    end=end,
+                )
+            )
     return bookings
 
 
@@ -134,7 +139,7 @@ def invert_bookings(bookings: list[CourtBooking]) -> list[CourtAvailability]:
                     start=earlier.end,
                     end=later.start,
                     court_name=court,
-                    location=earlier.location
+                    location=earlier.location,
                 )
             )
             later = earlier
