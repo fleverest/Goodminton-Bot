@@ -102,7 +102,7 @@ def create_poll(message):
         )
     elif len(options) == 2:
         botminton.send_message(
-            message.chat.id, f"There is only one option: {options[0]}"
+            message.chat.id, f"There is only one option: {options[0].text}"
         )
     else:
         botminton.send_message(
