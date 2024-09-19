@@ -86,11 +86,11 @@ def create_poll(message):
     options = [telebot.types.PollOption(str(summary)) for summary in summaries]
     # Take the first nine if there are more.
     if len(options) > 9:
-        options = options[:9]
         botminton.send_message(
             message.chat.id,
             f"Too many ({len(options)}) options to display in a single poll.",
         )
+        options = options[:9]
     options.append(telebot.types.PollOption("😭"))
     if len(options) > 2:
         botminton.send_poll(
